@@ -78,7 +78,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       }
     })
    .state('tab.points', {
-      url: '/points/:param1/:param2',
+      url: '/points/:param1/:param2/:param3',
       views: {
         'tab-points': {
           templateUrl: 'templates/tab-points.html',

@@ -127,7 +127,7 @@ angular
                   console.log("QUESTION "
                       + $scope.questions[n].quest);
                 } else {
-                     $state.go('tab.points', {param1 : $scope.correct, param2 : $scope.total});
+                     $state.go('tab.points', {param1 : $scope.correct, param2 : $scope.total, param3 : $scope.points});
                 }
               }
               ;
@@ -190,6 +190,7 @@ angular
     }).controller('PointsCtrl', function($scope, $stateParams, Chats) {
       $scope.correct = $stateParams.param1;
        $scope.total = $stateParams.param2;
+           $scope.points = $stateParams.param3;
     })
 
     .controller('AccountCtrl', function($scope) {
