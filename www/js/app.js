@@ -5,10 +5,19 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','ngCordova'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $ionicPopup) {
   $ionicPlatform.ready(function() {
+        // cordova plugin add org.apache.corova.network-information
+            if (window.Connection) {
+                if (navigator.connection.type == Connection.NONE) {
+                    $ionicPopup.confirm({
+                        title: "Internet is not working",
+                        content: "Internet is not working on your device."
+                    });
+                }
+            }
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
@@ -56,6 +65,24 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         'tab-chats': {
           templateUrl: 'templates/tab-chats.html',
           controller: 'ChatsCtrl'
+        }
+      }
+    })
+   .state('tab.questions', {
+      url: '/questions/:type',
+      views: {
+        'tab-questions': {
+          templateUrl: 'templates/tab-questions.html',
+          controller: 'QuestionsCtrl'
+        }
+      }
+    })
+   .state('tab.points', {
+      url: '/points/:param1/:param2',
+      views: {
+        'tab-points': {
+          templateUrl: 'templates/tab-points.html',
+          controller: 'PointsCtrl'
         }
       }
     })

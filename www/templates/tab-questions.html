@@ -1,0 +1,41 @@
+<ion-view view-title="Questions  Points: {{points}}"
+  name="tab-questions" class="nav-balanced"> <ion-content>
+<ion-list>
+
+<div>
+  <div class="item item-text-wrap">
+    <h2>{{question}}</h2>
+    <br /> <br />
+    <div class="button-bar">
+      <button ng-class="buttonColorOptionA"
+        ng-click="checkAnswer(optionA,1)"
+        style="margin-left: 5px; white-space: normal;">{{optionA}}</button>
+      <button ng-class="buttonColorOptionB"
+        ng-click="checkAnswer(optionB,2)"
+        style="margin-left: 5px; white-space: normal;">{{optionB}}</button>
+    </div>
+    <br />
+    <div class="button-bar">
+      <button ng-class="buttonColorOptionC"
+        ng-click="checkAnswer(optionC,3)"
+        style="margin-left: 5px; white-space: normal;">{{optionC}}</button>
+      <button ng-class="buttonColorOptionD"
+        ng-click="checkAnswer(optionD,4)"
+        style="margin-left: 5px; white-space: normal;">{{optionD}}</button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+</ion-list> 
+<script id="image-modal.html" type="text/ng-template">
+              <div class="modal image-modal transparent">
+                  <ion-pane class="transparent">
+                     <img ng-src="{{imageSrc}}" class="fullscreen-image"/>
+                  </ion-pane>
+              </div>
+          </script> 
+
+
+        </ion-content> </ion-view>

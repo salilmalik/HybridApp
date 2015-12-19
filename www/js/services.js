@@ -55,8 +55,21 @@ angular.module('starter.services', [])
   function getCategories() {
     return $http({
       method : 'GET',
-      url : 'http://localhost:8080/api/category'
+      url : 'http://54.69.21.130/api/category'
     })
+  }
+  ;
+
+} ]).factory('QuestionService', [ '$http', function($http) {
+  return {
+    getQuestions : getQuestions
+  };
+
+  function getQuestions(categoryType) {
+    return $http({
+      method : 'GET',
+      url : 'http://54.69.21.130/api/question/'+categoryType
+      })
   }
   ;
 
