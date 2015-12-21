@@ -7,17 +7,19 @@ angular
             '$stateParams',
             'QuestionService',
             '$timeout',
-            '$ionicModal','$state',
+            '$ionicModal',
+            '$state',
             function($scope, $stateParams, questionService,
-                $timeout, $ionicModal,$state) {
+                $timeout, $ionicModal, $state) {
               $scope.questions = {};
               $scope.nextQuestion = 0;
               $scope.question = '';
               $scope.answer = '';
               $scope.points = 0
               $scope.questionNumber = -1;
-              $scope.total=0;
-              $scope.correct=0;
+              $scope.total = 0;
+              $scope.correct = 0;
+              $scope.isAlreadyAnswered = false;
               $scope.imageSrc = 'http://ionicframework.com/img/ionic-logo-blog.png';
               $ionicModal.fromTemplateUrl('image-modal.html', {
                 scope : $scope,
@@ -69,7 +71,8 @@ angular
                         });
               }
               $scope.checkAnswer = function(userAnswer, x) {
-                console.log(userAnswer + x);
+                console.log(userAnswer);
+                console.log($scope.answer);
                 if (userAnswer === $scope.answer) {
                   $scope.correct++;
                   rightAnswerColor($scope.answer);
@@ -81,9 +84,10 @@ angular
                   playAnimation(2);
                   updatePoints(-5);
                 }
+                $scope.isAlreadyAnswered = true;
                 $timeout(function() {
                   getNextQuestion(++$scope.questionNumber);
-                }, 1200);
+                }, 1500);
                 // getNextQuestion(++$scope.questionNumber);
 
               }
@@ -112,22 +116,27 @@ angular
 
               }
               function getNextQuestion(n) {
-
+                $scope.isAlreadyAnswered = false;
                 if ($scope.questions.length > n) {
                   $scope.total++;
                   resetColor();
                   var questionOptions = $scope.questions[n].quest
                       .split('/');
-                  $scope.question = questionOptions[0];
-                  $scope.optionA = questionOptions[1];
-                  $scope.optionB = questionOptions[2];
-                  $scope.optionC = questionOptions[3];
-                  $scope.optionD = questionOptions[4];
-                  $scope.answer = $scope.questions[n].answer;
+                  $scope.question = questionOptions[0].trim();
+                  $scope.optionA = questionOptions[1].trim();
+                  $scope.optionB = questionOptions[2].trim();
+                  $scope.optionC = questionOptions[3].trim();
+                  $scope.optionD = questionOptions[4].trim();
+                  $scope.answer = $scope.questions[n].answer
+                      .trim();
                   console.log("QUESTION "
                       + $scope.questions[n].quest);
                 } else {
-                     $state.go('tab.points', {param1 : $scope.correct, param2 : $scope.total, param3 : $scope.points});
+                  $state.go('tab.points', {
+                    param1 : $scope.correct,
+                    param2 : $scope.total,
+                    param3 : $scope.points
+                  });
                 }
               }
               ;
@@ -137,6 +146,7 @@ angular
                 } else {
                   $scope.imageSrc = 'img/wrong.png';
                 }
+
                 $scope.openModal();
                 $timeout(function() {
                   $scope.modal.hide();
@@ -145,9 +155,9 @@ angular
                 console.log(isCorrect);
               }
               function updatePoints(points) {
-
-                $scope.points += points;
-
+                if (!$scope.isAlreadyAnswered) {
+                  $scope.points += points;
+                }
               }
 
             }
@@ -160,6 +170,12 @@ angular
             '$state',
             function($scope, categoryService) {
               $scope.categories = {};
+              $scope.color = {};
+              $scope.color = [ '{default}', '{light}',
+                  '{stable}', '{positive}', '{calm}',
+                  '{balanced}', '{energized}', '{assertive}',
+                  '{royal}', '{dark}' ];
+
               getCategories();
               function getCategories() {
                 categoryService.getCategories().success(
@@ -189,11 +205,35 @@ angular
       $scope.chat = Chats.get($stateParams.chatId);
     }).controller('PointsCtrl', function($scope, $stateParams, Chats) {
       $scope.correct = $stateParams.param1;
-       $scope.total = $stateParams.param2;
-           $scope.points = $stateParams.param3;
-    })
-
-    .controller('AccountCtrl', function($scope) {
+      $scope.total = $stateParams.param2;
+      $scope.points = $stateParams.param3;
+    }).controller(
+        'ProfileCtrl',
+        function($scope, $cordovaOauth,ProfileService) {
+          $scope.googleLogin = function() {
+            $cordovaOauth.google("108857563401-15qrp97fnjh1b6p5ka8jk8qvg36fquff.apps.googleusercontent.com", [ "email" ])
+                .then(function(result) {
+                  console.log("result" + result);
+                   console.log("result" + JSON.stringify(result));
+                   $scope.access_token=result.access_token;
+                   ProfileService.getProfile($scope.access_token).success(
+                        function(data) {
+                         console.log(data);
+                          console.log(JSON.stringify(data));
+                        });
+                }, function(error) {
+                  console.log("error" + error);
+                });
+          }
+            $scope.facebookLogin = function() {
+        $cordovaOauth.facebook("970456633001810", ["email","public_profile","user_friends"]).then(function(result) {
+          console.log(result);
+                          console.log(JSON.stringify(result));
+        }, function(error) {
+             console.log(error);
+        });
+    }
+        }).controller('AccountCtrl', function($scope) {
       $scope.settings = {
         enableFriends : true
       };

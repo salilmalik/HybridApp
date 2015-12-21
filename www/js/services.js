@@ -60,6 +60,20 @@ angular.module('starter.services', [])
   }
   ;
 
+} ]).factory('ProfileService', [ '$http', function($http) {
+  return {
+    getProfile : getProfile
+  };
+
+  function getProfile(access_token) {
+    console.log('access_token'+access_token);
+    return $http({
+      method : 'GET',
+      url : 'https://www.googleapis.com/plus/v1/people/me?access_token='+access_token
+    })
+  }
+  ;
+
 } ]).factory('QuestionService', [ '$http', function($http) {
   return {
     getQuestions : getQuestions
