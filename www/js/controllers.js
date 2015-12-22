@@ -162,7 +162,8 @@ angular
 
             }
 
-        ]).controller(
+        ])
+    .controller(
         'DashCtrl',
         [
             '$scope',
@@ -184,7 +185,8 @@ angular
                     });
               }
 
-            } ]).controller('ChatsCtrl', function($scope, Chats) {
+            } ])
+    .controller('ChatsCtrl', function($scope, Chats) {
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page
       // change.
@@ -203,36 +205,57 @@ angular
 
     .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
       $scope.chat = Chats.get($stateParams.chatId);
-    }).controller('PointsCtrl', function($scope, $stateParams, Chats) {
+    })
+    .controller('PointsCtrl', function($scope, $stateParams, Chats) {
       $scope.correct = $stateParams.param1;
       $scope.total = $stateParams.param2;
       $scope.points = $stateParams.param3;
-    }).controller(
+    })
+    .controller(
         'ProfileCtrl',
-        function($scope, $cordovaOauth,ProfileService) {
+        function($scope, $cordovaOauth, ProfileService,UserService) {
+          var user={};
           $scope.googleLogin = function() {
-            $cordovaOauth.google("108857563401-15qrp97fnjh1b6p5ka8jk8qvg36fquff.apps.googleusercontent.com", [ "email" ])
+            $cordovaOauth
+                .google(
+                    "108857563401-15qrp97fnjh1b6p5ka8jk8qvg36fquff.apps.googleusercontent.com",
+                    [ "email" ])
+                .then(
+                    function(result) {
+                      console.log("result" + result);
+                      console.log("result"
+                          + JSON.stringify(result));
+                      $scope.access_token = result.access_token;
+                      ProfileService
+                          .getProfile(
+                              $scope.access_token)
+                          .success(
+                              function(data) {
+                                user.name = data.displayName;
+                                user.email = data.emails[0].value;
+                                user.imageURL = data.image.url
+                                saveUserData(user);
+                              });
+                    }, function(error) {
+                      console.log("error" + error);
+                    });
+          }
+          function saveUserData(user) {
+           UserService.saveUserData(user).success(function(data) {
+               $scope.userID=data.objectId;
+            });
+          }
+          $scope.facebookLogin = function() {
+            $cordovaOauth.facebook("970456633001810",
+                [ "email", "public_profile", "user_friends" ])
                 .then(function(result) {
-                  console.log("result" + result);
-                   console.log("result" + JSON.stringify(result));
-                   $scope.access_token=result.access_token;
-                   ProfileService.getProfile($scope.access_token).success(
-                        function(data) {
-                         console.log(data);
-                          console.log(JSON.stringify(data));
-                        });
+                  console.log(result);
+                  console.log(JSON.stringify(result));
+
                 }, function(error) {
-                  console.log("error" + error);
+                  console.log(error);
                 });
           }
-            $scope.facebookLogin = function() {
-        $cordovaOauth.facebook("970456633001810", ["email","public_profile","user_friends"]).then(function(result) {
-          console.log(result);
-                          console.log(JSON.stringify(result));
-        }, function(error) {
-             console.log(error);
-        });
-    }
         }).controller('AccountCtrl', function($scope) {
       $scope.settings = {
         enableFriends : true
