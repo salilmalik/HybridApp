@@ -1,12 +1,27 @@
 <ion-view view-title="Profile" name="tab-profile" class="nav-balanced"> >
 
   <ion-content class="padding">
-<div class="row">
+<div class="row" ng-show="!isAuthenticated">
   <div class="col-70 col-offset-25">
     <img ng-src="img/googleplus.png" ng-click="googleLogin()" style="width:80%">
 <img ng-src="img/facebook.png" ng-click="facebookLogin()" style="width:80%">
 </div>
 </div>
+<div class="card" ng-show="isAuthenticated">
+  <div class="item item-divider">
+     {{name}}
+  </div>
+  <div class="item item-text-wrap">
+   {{email}}
+  </div>
+  <div class="item item-text-wrap">
+  <img ng-src="{{imageURL}}">
+  </div>
+  <div class="item item-text-wrap">
+<img ng-src="img/logout.png" ng-click="logout()" style="width:80%">
+  </div>
+  
+
 </div>
   </ion-content>
 </ion-view>

@@ -213,8 +213,22 @@ angular
     })
     .controller(
         'ProfileCtrl',
-        function($scope, $cordovaOauth, ProfileService,UserService) {
-          var user={};
+        function($scope,$window,$state, $cordovaOauth, ProfileService,
+            UserService, $localstorage) {
+          $scope.isAuthenticated = false;
+          var user = {};
+          var user = $localstorage.getObject('user');
+          console.log('user' + JSON.stringify(user));
+          console.log('user' + JSON.stringify(user));
+          if (user.name === undefined) {
+          
+          } else {
+            $scope.isAuthenticated = true;
+            $scope.email = user.email;
+            $scope.name = user.name;
+            $scope.imageURL = user.imageURL;
+          }
+
           $scope.googleLogin = function() {
             $cordovaOauth
                 .google(
@@ -227,7 +241,7 @@ angular
                           + JSON.stringify(result));
                       $scope.access_token = result.access_token;
                       ProfileService
-                          .getProfile(
+                          .getProfileGoogle(
                               $scope.access_token)
                           .success(
                               function(data) {
@@ -241,20 +255,51 @@ angular
                     });
           }
           function saveUserData(user) {
-           UserService.saveUserData(user).success(function(data) {
-               $scope.userID=data.objectId;
+            UserService.saveUserData(user).success(function(data) {
+              $scope.userID = data.objectId;
+              $localstorage.setObject('user', user);
+          $state.go($state.current, {}, {reload: true});
             });
           }
-          $scope.facebookLogin = function() {
-            $cordovaOauth.facebook("970456633001810",
-                [ "email", "public_profile", "user_friends" ])
-                .then(function(result) {
-                  console.log(result);
-                  console.log(JSON.stringify(result));
 
-                }, function(error) {
-                  console.log(error);
-                });
+          $scope.facebookLogin = function() {
+            $cordovaOauth
+                .facebook(
+                    "970456633001810",
+                    [ "email", "public_profile",
+                        "user_friends" ])
+                .then(
+                    function(result) {
+                      console.log(result);
+                      console.log(JSON.stringify(result));
+                      $scope.access_token = result.access_token;
+                      ProfileService
+                          .getProfileFacebook(
+                              $scope.access_token)
+                          .success(
+                              function(data) {
+                                console
+                                    .log(JSON
+                                        .stringify(data));
+                                user.name = data.name;
+                                user.email = data.email;
+                                user.imageURL = data.picture.data.url;
+                                console
+                                    .log('USER'
+                                        + JSON
+                                            .stringify(user));
+                                saveUserData(user);
+                              });
+
+                    }, function(error) {
+                      console.log(error);
+                    });
+          }
+          $scope.logout = function() {
+
+            $localstorage.setObject('user', undefined);
+            $scope.isAuthenticated = false;
+         $state.go($state.current, {}, {reload: true});
           }
         }).controller('AccountCtrl', function($scope) {
       $scope.settings = {

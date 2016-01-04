@@ -69,14 +69,25 @@ angular
             '$http',
             function($http) {
               return {
-                getProfile : getProfile
+                getProfileGoogle : getProfileGoogle,
+                getProfileFacebook : getProfileFacebook
               };
 
-              function getProfile(access_token) {
+              function getProfileGoogle(access_token) {
                 console.log('access_token' + access_token);
                 return $http({
                   method : 'GET',
                   url : 'https://www.googleapis.com/plus/v1/people/me?access_token='
+                      + access_token
+                })
+              }
+              ;
+
+              function getProfileFacebook(access_token) {
+                console.log('access_token' + access_token);
+                return $http({
+                  method : 'GET',
+                  url : 'https://graph.facebook.com/me?fields=name,email,gender,age_range,picture,location&access_token='
                       + access_token
                 })
               }
@@ -109,4 +120,26 @@ angular
       }
       ;
 
+    } ]).factory('$localstorage', [ '$window', function($window) {
+      return {
+        set : function(key, value) {
+          $window.localStorage[key] = value;
+        },
+        get : function(key, defaultValue) {
+          return $window.localStorage[key] || defaultValue;
+        },
+        setObject : function(key, value) {
+          $window.localStorage[key] = JSON.stringify(value);
+        },
+        getObject : function(key) {
+          console.log("key: "+$window.localStorage[key]);
+           console.log("key: "+JSON.stringify($window.localStorage[key]));
+          if($window.localStorage[key]==="undefined"){
+          return {};
+          }
+          else{
+          return JSON.parse($window.localStorage[key] || '{}');
+          }
+        }
+      }
     } ]);

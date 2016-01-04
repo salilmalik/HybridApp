@@ -87,6 +87,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       }
     })
     .state('tab.profile', {
+      cache: false,
       url: '/profile',
       views: {
         'tab-profile': {
