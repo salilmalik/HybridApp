@@ -9,8 +9,10 @@ angular
             '$timeout',
             '$ionicModal',
             '$state',
+            '$localstorage',
             function($scope, $stateParams, questionService,
-                $timeout, $ionicModal, $state) {
+                $timeout, $ionicModal, $state, $localstorage) {
+
               $scope.questions = {};
               $scope.nextQuestion = 0;
               $scope.question = '';
@@ -20,39 +22,29 @@ angular
               $scope.total = 0;
               $scope.correct = 0;
               $scope.isAlreadyAnswered = false;
-              $scope.imageSrc = 'http://ionicframework.com/img/ionic-logo-blog.png';
+              $scope.imageSrc = 'img/ionic.png';
               $ionicModal.fromTemplateUrl('image-modal.html', {
                 scope : $scope,
                 animation : 'slide-in-up'
               }).then(function(modal) {
                 $scope.modal = modal;
               });
-
               $scope.openModal = function() {
                 $scope.modal.show();
               };
-
               $scope.closeModal = function() {
                 $scope.modal.hide();
               };
-
-              // Cleanup the modal when we're done with it!
               $scope.$on('$destroy', function() {
                 $scope.modal.remove();
               });
-              // Execute action on hide modal
               $scope.$on('modal.hide', function() {
-                // Execute action
               });
-              // Execute action on remove modal
               $scope.$on('modal.removed', function() {
-                // Execute action
               });
               $scope.$on('modal.shown', function() {
                 console.log('Modal is shown!');
               });
-
-              /* $cordovaNativeAudio.play('yes'); */
               resetColor();
               getQuestions();
               function resetColor() {
@@ -67,12 +59,30 @@ angular
                     .success(
                         function(data) {
                           $scope.questions = data;
+                          console
+                              .log("$scope.questions:asdsad"
+                                  + $scope.questions);
+                          $localstorage
+                              .setObject(
+                                  $stateParams.type
+                                      + 'Questions',
+                                  $scope.questions);
                           getNextQuestion(++$scope.questionNumber);
+                        })
+                    .error(
+                        function(data, status) {
+                          $scope.questions = $localstorage
+                              .getObject($stateParams.type
+                                  + 'Questions');
+                          if (JSON
+                              .stringify($scope.questions) == '{}') {
+                            $scope.noQuestions = 'Internet is closed. Cannot fetch questions for this category';
+                          } else {
+                            getNextQuestion(++$scope.questionNumber);
+                          }
                         });
               }
               $scope.checkAnswer = function(userAnswer, x) {
-                console.log(userAnswer);
-                console.log($scope.answer);
                 if (userAnswer === $scope.answer) {
                   $scope.correct++;
                   rightAnswerColor($scope.answer);
@@ -88,8 +98,6 @@ angular
                 $timeout(function() {
                   getNextQuestion(++$scope.questionNumber);
                 }, 1500);
-                // getNextQuestion(++$scope.questionNumber);
-
               }
               function rightAnswerColor(answer) {
                 if ($scope.optionA === answer) {
@@ -129,8 +137,6 @@ angular
                   $scope.optionD = questionOptions[4].trim();
                   $scope.answer = $scope.questions[n].answer
                       .trim();
-                  console.log("QUESTION "
-                      + $scope.questions[n].quest);
                 } else {
                   $state.go('tab.points', {
                     param1 : $scope.correct,
@@ -151,8 +157,6 @@ angular
                 $timeout(function() {
                   $scope.modal.hide();
                 }, 1000);
-
-                console.log(isCorrect);
               }
               function updatePoints(points) {
                 if (!$scope.isAlreadyAnswered) {
@@ -169,43 +173,71 @@ angular
             '$scope',
             'CategoryService',
             '$state',
-            function($scope, categoryService) {
+            '$localstorage',
+            '$rootScope',
+            '$cordovaNetwork',
+            function($scope, categoryService, $state,
+                $localstorage, $rootScope, $cordovaNetwork) {
               $scope.categories = {};
               $scope.color = {};
               $scope.color = [ '{default}', '{light}',
                   '{stable}', '{positive}', '{calm}',
                   '{balanced}', '{energized}', '{assertive}',
                   '{royal}', '{dark}' ];
+              document
+                  .addEventListener(
+                      "deviceready",
+                      function() {
+                        var type = $cordovaNetwork
+                            .getNetwork()
+                        var isOnline = $cordovaNetwork
+                            .isOnline()
+                        var isOffline = $cordovaNetwork
+                            .isOffline()
+                        // listen for Online event
+                        $rootScope
+                            .$on(
+                                '$cordovaNetwork:online',
+                                function(event,
+                                    networkState) {
+                                  var onlineState = networkState;
+                                  $scope.noCategory = '';
+                                  getCategories();
+                                })
 
+                        // listen for Offline event
+                        $rootScope
+                            .$on(
+                                '$cordovaNetwork:offline',
+                                function(event,
+                                    networkState) {
+                                  var offlineState = networkState;
+                                })
+
+                      }, false);
               getCategories();
               function getCategories() {
-                categoryService.getCategories().success(
-                    function(data) {
-                      $scope.categories = data;
-                    });
+                categoryService
+                    .getCategories()
+                    .success(
+                        function(data) {
+                          $scope.categories = data;
+                          $localstorage.setObject(
+                              'categories',
+                              $scope.categories);
+                        })
+                    .error(
+                        function(data, status) {
+                          $scope.categories = $localstorage
+                              .getObject('categories');
+                          if (JSON
+                              .stringify($scope.categories) == '{}') {
+                            $scope.noCategory = 'Internet is closed. Cannot fetch categories';
+                          }
+                        });
               }
 
             } ])
-    .controller('ChatsCtrl', function($scope, Chats) {
-      // With the new view caching in Ionic, Controllers are only called
-      // when they are recreated or on app start, instead of every page
-      // change.
-      // To listen for when this page is active (for example, to refresh
-      // data),
-      // listen for the $ionicView.enter event:
-      //
-      // $scope.$on('$ionicView.enter', function(e) {
-      // });
-
-      $scope.chats = Chats.all();
-      $scope.remove = function(chat) {
-        Chats.remove(chat);
-      };
-    })
-
-    .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-      $scope.chat = Chats.get($stateParams.chatId);
-    })
     .controller('PointsCtrl', function($scope, $stateParams, Chats) {
       $scope.correct = $stateParams.param1;
       $scope.total = $stateParams.param2;
@@ -213,22 +245,19 @@ angular
     })
     .controller(
         'ProfileCtrl',
-        function($scope,$window,$state, $cordovaOauth, ProfileService,
-            UserService, $localstorage) {
+        function($scope, $window, $state, $cordovaOauth,
+            ProfileService, UserService, $localstorage) {
           $scope.isAuthenticated = false;
           var user = {};
           var user = $localstorage.getObject('user');
-          console.log('user' + JSON.stringify(user));
-          console.log('user' + JSON.stringify(user));
           if (user.name === undefined) {
-          
+
           } else {
             $scope.isAuthenticated = true;
             $scope.email = user.email;
             $scope.name = user.name;
             $scope.imageURL = user.imageURL;
           }
-
           $scope.googleLogin = function() {
             $cordovaOauth
                 .google(
@@ -236,9 +265,6 @@ angular
                     [ "email" ])
                 .then(
                     function(result) {
-                      console.log("result" + result);
-                      console.log("result"
-                          + JSON.stringify(result));
                       $scope.access_token = result.access_token;
                       ProfileService
                           .getProfileGoogle(
@@ -251,17 +277,17 @@ angular
                                 saveUserData(user);
                               });
                     }, function(error) {
-                      console.log("error" + error);
                     });
           }
           function saveUserData(user) {
             UserService.saveUserData(user).success(function(data) {
               $scope.userID = data.objectId;
               $localstorage.setObject('user', user);
-          $state.go($state.current, {}, {reload: true});
+              $state.go($state.current, {}, {
+                reload : true
+              });
             });
           }
-
           $scope.facebookLogin = function() {
             $cordovaOauth
                 .facebook(
@@ -270,39 +296,25 @@ angular
                         "user_friends" ])
                 .then(
                     function(result) {
-                      console.log(result);
-                      console.log(JSON.stringify(result));
                       $scope.access_token = result.access_token;
                       ProfileService
                           .getProfileFacebook(
                               $scope.access_token)
                           .success(
                               function(data) {
-                                console
-                                    .log(JSON
-                                        .stringify(data));
                                 user.name = data.name;
                                 user.email = data.email;
                                 user.imageURL = data.picture.data.url;
-                                console
-                                    .log('USER'
-                                        + JSON
-                                            .stringify(user));
                                 saveUserData(user);
                               });
-
                     }, function(error) {
-                      console.log(error);
                     });
           }
           $scope.logout = function() {
-
             $localstorage.setObject('user', undefined);
             $scope.isAuthenticated = false;
-         $state.go($state.current, {}, {reload: true});
+            $state.go($state.current, {}, {
+              reload : true
+            });
           }
-        }).controller('AccountCtrl', function($scope) {
-      $scope.settings = {
-        enableFriends : true
-      };
-    });
+        });

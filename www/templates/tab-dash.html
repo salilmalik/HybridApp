@@ -1,5 +1,6 @@
 <ion-view view-title="Dashboard">
   <ion-content class="padding">
+  {{noCategory}}
     <ion-list>
       <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="category in categories" type="item-text-wrap" href="#/tab/questions/{{category.type}}">
         <h2 class="positive">{{category.type}}</h2>

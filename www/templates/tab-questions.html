@@ -1,7 +1,7 @@
 <ion-view view-title="Questions  Points: {{points}}"
   name="tab-questions" class="nav-balanced"> <ion-content>
 <ion-list>
-
+{{noQuestions}}
 <div>
   <div class="item item-text-wrap">
     <h2>{{question}}</h2>
@@ -27,15 +27,10 @@
 </div>
 </div>
 
-
-</ion-list> 
-<script id="image-modal.html" type="text/ng-template">
+</ion-list> <script id="image-modal.html" type="text/ng-template">
               <div class="modal image-modal transparent">
                   <ion-pane class="transparent">
                      <img ng-src="{{imageSrc}}" class="fullscreen-image"/>
                   </ion-pane>
               </div>
-          </script> 
-
-
-        </ion-content> </ion-view>
+          </script> </ion-content> </ion-view>
